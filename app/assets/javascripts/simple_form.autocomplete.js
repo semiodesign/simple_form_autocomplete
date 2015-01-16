@@ -392,7 +392,7 @@
 
 
 
-$(document).ready(function(){
+autocompleteFn =  function(){
 	$('input[id^=autocomplete_for_]').each(function(index, input){
 		$(input).blur(function(){
 			if($(this).val().trim() == '')
@@ -424,4 +424,6 @@ $(document).ready(function(){
 		})
 	});
 	
-})
+}
+$(document).ready(autocompleteFn);
+$(document).on('page:load', autocompleteFn)
