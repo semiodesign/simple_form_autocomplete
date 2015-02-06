@@ -980,19 +980,44 @@
 }));
 
 
-autocompleteFn =  function(){
-	$('input[id^=autocomplete_for_]').each(function(index, input){
-		$(input).blur(function(){
-			if($(this).val().trim() == '')
-				$($(input).data('field')).val('')
-		}).click(function(){
-			this.select();
-		}).autocomplete({
-			serviceUrl: $(input).data('source'),
-			minChars: $(input).data('min-chars'),
-			onSelect: function(value, data) {	$($(input).data('field')).val(data) }
-		})
-	});
+window.autocomplete = function(input){
+  $(input).blur(function(){
+    if($(this).val().trim() == '')
+      $($(input).data('field')).val('')
+  }).click(function(){
+    this.select();
+  }).autocomplete({
+    serviceUrl: $(input).data('source'),
+    minChars: $(input).data('min-chars'),
+    onSelect: function(suggestion) {	
+      // console.log('typeof suggestion: ' + typeof suggestion);
+      if(typeof suggestion === 'object'){
+        // console.log('typeof suggestion[\'id\']: ' + typeof suggestion['id']);
+        // console.log('typeof suggestion.id: ' + typeof suggestion.id);
+        // console.log('suggestion:');
+        // console.log(suggestion);
+        if (typeof suggestion['id'] == 'string' || typeof suggestion['id'] == 'number') {
+          // console.log('id element name:');
+          // console.log($(input).data('field'));
+          $($(input).data('field')).val(suggestion.id); 
+        } 
+      }
+      if (typeof suggestion === 'string') { 
+      }
+      // console.log('onSelect executed;');
+      // console.log('value: \\|/');
+      // console.log(value);
+      // console.log('suggestion: \\|/');
+      // console.log(suggestion);
+      $(input).trigger('autocomplete:after-select', [$(input), suggestion]);
+    }
+  })
+};
+
+autocompleteInit = function(){
+  $('input[id^=autocomplete_for_]').each(function(index, input) {
+    window.autocomplete(input);
+  });
 	
 	$('.autocomplete_selections a.remove').click(function(){
 		$(this).closest('li').remove();
@@ -1011,7 +1036,6 @@ autocompleteFn =  function(){
 			}
 		})
 	});
-	
-}
-$(document).ready(autocompleteFn);
-$(document).on('page:load', autocompleteFn)
+};
+$(document).ready(autocompleteInit);
+$(document).on('page:load', autocompleteInit);

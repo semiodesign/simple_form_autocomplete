@@ -2,18 +2,22 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
 
   def input
     label, value = detect_collection_methods
-
     @reflection = @reflection || object.class.reflections[attribute_name]
+    entity_value = object.send(reflection.name)
+
+    # raise "PCCR: #{entity_value}"
     case reflection.macro
     when :belongs_to
-      @builder.hidden_field(attribute_name) +
+      @builder.hidden_field("#{attribute_name}_id", value: entity_value.try(:id)) +
       template.text_field_tag(
-        "autocomplete_for[#{object_name}_#{reflection.name}]",
+        "autocomplete_for[#{field_name}]",
         object.send(reflection.name).try(label),
+          :value => entity_value.try(:name),
           :"data-source" => options[:source],
-          :"data-field" => "##{object_name}_#{attribute_name}",
+          :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
           :"data-min-chars" => options[:min_chars] || 3,
-          :class => input_options[:class]
+          :class => input_options[:class],
+          :disabled => input_options[:disabled]
       )
     else
       template.content_tag(:ul, current_selections.map { |s|
@@ -32,12 +36,20 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
     end
   end
 
+  def field_name
+    if @builder.options[:parent_builder].nil?
+      return "#{object_name}_#{attribute_name}"
+    else
+      return "#{object_name}[#{attribute_name}]"
+    end
+  end
+
   def current_selections
     object.send(reflection.name)
   end
 
   def label_method
-    o = reflection.klass.new
+    reflection.klass.new
   end
 
   def selection_tag(id, name)
@@ -50,5 +62,4 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
       template.link_to('Remove', '#', :class => 'remove')
     end
   end
-
 end
