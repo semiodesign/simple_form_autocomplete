@@ -990,25 +990,11 @@ window.autocomplete = function(input){
     serviceUrl: $(input).data('source'),
     minChars: $(input).data('min-chars'),
     onSelect: function(suggestion) {	
-      // console.log('typeof suggestion: ' + typeof suggestion);
       if(typeof suggestion === 'object'){
-        // console.log('typeof suggestion[\'id\']: ' + typeof suggestion['id']);
-        // console.log('typeof suggestion.id: ' + typeof suggestion.id);
-        // console.log('suggestion:');
-        // console.log(suggestion);
         if (typeof suggestion['id'] == 'string' || typeof suggestion['id'] == 'number') {
-          // console.log('id element name:');
-          // console.log($(input).data('field'));
-          $($(input).data('field')).val(suggestion.id); 
+          $($(input).data('field')).val(suggestion.id);
         } 
       }
-      if (typeof suggestion === 'string') { 
-      }
-      // console.log('onSelect executed;');
-      // console.log('value: \\|/');
-      // console.log(value);
-      // console.log('suggestion: \\|/');
-      // console.log(suggestion);
       $(input).trigger('autocomplete:after-select', [$(input), suggestion]);
     }
   })

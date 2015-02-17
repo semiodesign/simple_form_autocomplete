@@ -1,44 +1,39 @@
 class AutocompleteInput < SimpleForm::Inputs::CollectionInput
-
+  # @param wrapp_options []
+  # @param input_options:
+  #   name_method: [Symbol] method to call on the object for the display value
+  #   id_method: [Symbol] method to call on the object for the stored value
+  #   search_path: [String] URL to send search request to
+  #   disabled_if: (optional)
+  #   disabled_unless: (optional)
+  #   disabled: [Boolean] True if field should be disabled; defaults: false
+  #   class: [String] CSS classes to add to the input element
+  #   min_chars: [integer] Minimum number of characters the user has to enter
+  #   into the input box before a search will commence
   def input wrapper_options
-    label, value = detect_collection_methods
-    klass = input_options[:search_class]
-    @reflection = @reflection || object.class.reflections[attribute_name] || klass
-    if reflection.respond_to? :name
+    @reflection = @reflection || object.class.reflections[attribute_name]
+    if reflection.respond_to? :name and !@reflection.is_a?Class
       entity_value = object.send(reflection.name)
     else
       entity_value = nil
     end
 
-    # case reflection.macro
-    # when :belongs_to
-      @builder.hidden_field("#{attribute_name}_id", value: entity_value.try(:id)) +
-      template.text_field_tag(
-        "autocomplete_for[#{field_name}]",
-        object.send(reflection.name).try(label),
-          :value => entity_value.try(:name),
-          :"data-source" => options[:source],
-          :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
-          :"data-min-chars" => options[:min_chars] || 3,
-          :class => input_options[:class],
-          :disabled => input_options[:disabled]
-      )
-    # else
-    #   template.content_tag(:ul, current_selections.map { |s|
-    #       selection_tag(s.send(value), s.send(label))
-    #     }.join('').html_safe,
-    #     :id => "autocomplete_selections_for_#{object_name}_#{reflection.name}",
-    #     :class => 'autocomplete_selections') +
-    #   template.text_field_tag(
-    #     "autocomplete_multiple_for[#{object_name}_#{reflection.name}]",
-    #     '',
-    #     :"data-source" => options[:source],
-    #     :"data-selections" =>
-    #       "#autocomplete_selections_for_#{object_name}_#{reflection.name}",
-    #     :"data-min-chars" => options[:min_chars] || 3,
-    #     :"data-template" => CGI.escapeHTML(selection_tag("ID", "VALUE")))
-    # end
+    id_method = input_options[:id_method] || :id
+    value_method = input_options[:value_method] || input_options[:name_method] || :name
+
+    @builder.hidden_field("#{attribute_name}_id", value: entity_value.try(id_method)) +
+    template.text_field_tag(
+      "autocomplete_for[#{field_name}]",
+        entity_value.try(value_method),
+        :"data-source" => options[:source],
+        :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
+        :"data-min-chars" => options[:min_chars] || 3,
+        :class => input_options[:class],
+        :disabled => input_options[:disabled]
+    )
   end
+
+  private
 
   def field_name
     if @builder.options[:parent_builder].nil?
