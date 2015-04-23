@@ -12,10 +12,13 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
   #   into the input box before a search will commence
   def input wrapper_options
     @reflection = @reflection || object.class.reflections[attribute_name]
-    if reflection.respond_to? :name and !@reflection.is_a?Class
-      entity_value = object.send(reflection.name)
-    else
-      entity_value = nil
+    entity_value = predefined_entity
+    if entity_value.nil?
+      if reflection.respond_to? :name and !@reflection.is_a?Class
+        entity_value = object.send(reflection.name)
+      else
+        entity_value = nil
+      end
     end
 
     id_method = input_options[:id_method] || :id
@@ -29,6 +32,7 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
         :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
         :"data-min-chars" => options[:min_chars] || 3,
         :class => input_options[:class],
+        :placeholder => input_options[:placeholder],
         :disabled => input_options[:disabled]
     )
   end
@@ -45,6 +49,10 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
 
   def current_selections
     object.send(reflection.name)
+  end
+
+  def predefined_entity
+    input_options[:entity]
   end
 
   def label_method
