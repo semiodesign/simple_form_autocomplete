@@ -28,16 +28,18 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
     template.text_field_tag(
       "autocomplete_for[#{field_name}]",
         entity_value.try(value_method),
-        :"data-source" => options[:source],
-        :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
-        :"data-min-chars" => options[:min_chars] || 3,
-        :class => input_options[:class],
-        :placeholder => input_options[:placeholder],
-        :disabled => input_options[:disabled]
+      input_html_options
     )
   end
 
   private
+
+  def input_html_options
+    # raise "#{super}"
+    {:"data-source" => options[:source],
+    :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
+        :"data-min-chars" => options[:min_chars] || 3}.merge(super)
+  end
 
   def field_name
     if @builder.options[:parent_builder].nil?
