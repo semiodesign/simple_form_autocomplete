@@ -24,7 +24,7 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
     id_method = input_options[:id_method] || :id
     value_method = input_options[:value_method] || input_options[:name_method] || :name
 
-    @builder.hidden_field("#{attribute_name}_id", value: entity_value.try(id_method)) +
+    @builder.hidden_field("#{attribute_name}", value: entity_value.try(id_method)) +
     template.text_field_tag(
       "autocomplete_for[#{field_name}]",
         entity_value.try(value_method),
@@ -37,7 +37,7 @@ class AutocompleteInput < SimpleForm::Inputs::CollectionInput
   def input_html_options
     # raise "#{super}"
     {:"data-source" => options[:source],
-    :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, '') + '_id',
+    :"data-field" => '#' + field_name.gsub(/\[/, '_').gsub(/\]/, ''),
         :"data-min-chars" => options[:min_chars] || 3}.merge(super)
   end
 
